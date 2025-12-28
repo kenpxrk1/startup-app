@@ -16,3 +16,12 @@ spring:
         format_sql: true
         default_schema: public
     open-in-view: false
+
+telegram:
+  bot:
+    token: hui
+
+jwt:
+  secret: super-huinya
+  access-token-ttl: 900000
+  refresh-token-ttl: 2592000000
