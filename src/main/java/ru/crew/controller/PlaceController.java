@@ -33,6 +33,15 @@ public class PlaceController {
         return service.findAll(name, type, city, page, size);
     }
 
+    @GetMapping("search/{name}")
+    @Operation(summary = "Получить список мест (с optional поиском по названию)" +
+            "Если ничего не найдено, возвращает null")
+    public List<PlaceResponse> getAll(
+            @PathVariable String name
+    ) {
+        return service.findAll(name);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Получить место по ID")
     public PlaceResponse get(@PathVariable Long id) {

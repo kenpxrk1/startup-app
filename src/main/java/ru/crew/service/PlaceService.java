@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import ru.crew.dto.place.PlaceCreateRequest;
 import ru.crew.dto.place.PlaceUpdateRequest;
 import ru.crew.dto.place.PlaceResponse;
@@ -28,6 +29,19 @@ public class PlaceService {
         Specification<PlaceEntity> spec = PlaceSpecification.applyFilters(name, type, city);
         Page<PlaceEntity> places = repository.findAll(spec, PageRequest.of(page, size));
         return places.map(mapper::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlaceResponse> findAll(String name) {
+        List<PlaceEntity> places = repository.findByNameContainingIgnoreCase(name);
+
+        if (CollectionUtils.isEmpty(places)) {
+            return null;
+        }
+
+        return places.stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     public PlaceResponse findById(Long id) {

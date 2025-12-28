@@ -4,10 +4,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.crew.dto.event.EventCreateRequest;
-import ru.crew.dto.event.EventUpdateRequest;
 import ru.crew.dto.event.EventResponse;
+import ru.crew.dto.event.EventUpdateRequest;
 import ru.crew.service.EventService;
 
 import java.time.Instant;
@@ -32,6 +40,15 @@ public class EventController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return service.findAll(title, city, startAt, page, size);
+    }
+
+    @GetMapping("search/{name}")
+    @Operation(summary = "Получить список мест с поиском по названию. " +
+            "Если ничего не найдено, возвращает null")
+    public List<EventResponse> getAll(
+            @PathVariable String name
+    ) {
+        return service.findAll(name);
     }
 
     @GetMapping("/{id}")

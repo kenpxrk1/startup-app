@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import ru.crew.dto.event.EventCreateRequest;
 import ru.crew.dto.event.EventUpdateRequest;
 import ru.crew.dto.event.EventResponse;
@@ -29,6 +30,18 @@ public class EventService {
         Specification<EventEntity> spec = EventSpecification.applyFilters(title, city, startAt);
         Page<EventEntity> events = repository.findAll(spec, PageRequest.of(page, size));
         return events.map(mapper::toResponse).toList();
+    }
+
+    public List<EventResponse> findAll(String title) {
+        List<EventEntity> events = repository.findByTitleContainingIgnoreCase(title);
+
+        if (CollectionUtils.isEmpty(events)) {
+            return null;
+        }
+
+        return events.stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     public EventResponse findById(Long id) {

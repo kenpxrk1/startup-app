@@ -6,6 +6,8 @@ import ru.crew.dto.place.PlaceResponse;
 import ru.crew.dto.place.PlaceUpdateRequest;
 import ru.crew.model.PlaceEntity;
 
+import java.util.ArrayList;
+
 @Component
 public class PlaceMapper {
 
@@ -14,6 +16,14 @@ public class PlaceMapper {
         place.setName(r.name());
         place.setType(r.type());
         place.setCity(r.city());
+        place.setDescription(r.description());
+
+        if (r.photos() != null) {
+            place.setPhotos(new ArrayList<>(r.photos()));
+        } else {
+            place.setPhotos(new ArrayList<>());
+        }
+
         return place;
     }
 
@@ -21,6 +31,11 @@ public class PlaceMapper {
         place.setName(r.name());
         place.setType(r.type());
         place.setCity(r.city());
+        place.setDescription(r.description());
+
+        if (r.photos() != null) {
+            place.setPhotos(new ArrayList<>(r.photos()));
+        }
     }
 
     public PlaceResponse toResponse(PlaceEntity place) {
@@ -28,8 +43,11 @@ public class PlaceMapper {
                 place.getId(),
                 place.getName(),
                 place.getType(),
-                place.getCity()
+                place.getCity(),
+                place.getDescription(),
+                place.getPhotos()
         );
     }
 }
+
 

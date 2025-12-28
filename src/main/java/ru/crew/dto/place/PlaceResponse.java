@@ -3,7 +3,7 @@ package ru.crew.dto.place;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ru.crew.model.constant.PlaceType;
 
-import java.util.UUID;
+import java.util.List;
 
 @Schema(description = "Ответ с данными места (Place)")
 public record PlaceResponse(
@@ -18,6 +18,12 @@ public record PlaceResponse(
         PlaceType type,
 
         @Schema(description = "Город", example = "Moscow")
-        String city
+        String city,
+
+        @Schema(description = "Описание места", example = "Лучший рок-бар в центре города")
+        String description,
+
+        @Schema(description = "Ссылки на фотографии места")
+        List<String> photos
 ) {}
 
