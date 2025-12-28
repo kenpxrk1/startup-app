@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: CrewApp
+  profiles:
+    active: local
