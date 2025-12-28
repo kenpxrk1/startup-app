@@ -19,9 +19,9 @@ spring:
 
 telegram:
   bot:
-    token: hui
+    token: 8256676238:AAGmBF6jwHDKMLU5Rc8vG1NUPV9P3DplnSI
 
 jwt:
-  secret: super-huinya
+  secret: F1r3!T0k3n#S3cUr3K3y_2025$SuperRandomBytes123
   access-token-ttl: 900000
   refresh-token-ttl: 2592000000

@@ -2,6 +2,7 @@ package ru.crew.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.crew.dto.auth.AuthResponse;
@@ -15,6 +16,7 @@ import ru.crew.mapper.UserMapper;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -30,15 +32,18 @@ public class AuthService {
 
     @Transactional
     public AuthResponse authenticateTelegram(String initData) {
-        TelegramUserData tgUser = telegramAuthService.verify(initData);
+        try {
+            TelegramUserData tgUser = telegramAuthService.verify(initData);
+            UserEntity user = userRepository
+                    .findById(tgUser.id())
+                    .orElseGet(() -> createUser(tgUser));
 
-        UserEntity user = userRepository
-                .findById(tgUser.id())
-                .orElseGet(() -> createUser(tgUser));
-
-        refreshTokenRepository.deleteAllByUser(user);
-
-        return generateAndSaveTokens(user);
+            refreshTokenRepository.deleteAllByUser(user);
+            return generateAndSaveTokens(user);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Transactional

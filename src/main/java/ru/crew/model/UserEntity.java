@@ -29,6 +29,6 @@ public class UserEntity extends BaseEntity {
 
     private String language;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Instant lastActiveAt;
 }

@@ -1,6 +1,7 @@
 package ru.crew.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,16 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TelegramAuthService {
 
     private final TelegramUserMapper telegramUserMapper;
@@ -25,23 +30,41 @@ public class TelegramAuthService {
     private String botToken;
 
     public TelegramUserData verify(String initData) {
+        log.info("InitData = '{}'", initData);
         Map<String, String> data = parse(initData);
-        String receivedHash = data.remove("hash");
+        log.info(data.toString());
 
-        String checkString = data.entrySet().stream()
+        String receivedHash = data.remove("hash");
+        log.info(receivedHash);
+
+        // Проверка подписи
+        String dataCheckString = data.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
 
-        byte[] secretKey = hmacSha256Bytes("WebAppData", botToken);
-        String calculatedHash = hmacSha256Hex(secretKey, checkString);
+        try {
+            byte[] secretKey = sha256(botToken);
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
+            String calculated = Hex.encodeHexString(mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8)));
 
-        if (!calculatedHash.equals(receivedHash)) {
-            throw new RuntimeException("Invalid Telegram signature");
+            if (!calculated.equalsIgnoreCase(receivedHash)) {
+                throw new RuntimeException("Invalid Telegram signature");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error verifying Telegram signature", e);
+        }
+
+        // Проверка наличия user
+        String userJson = data.get("user");
+        if (userJson == null || userJson.isEmpty()) {
+            throw new RuntimeException("Cannot parse null string (user field is missing)");
         }
 
         return telegramUserMapper.fromMap(data);
     }
+
 
     private Map<String, String> parse(String initData) {
         Map<String, String> result = new HashMap<>();
@@ -59,21 +82,10 @@ public class TelegramAuthService {
         return result;
     }
 
-    private byte[] hmacSha256Bytes(String key, String data) {
+    private byte[] sha256(String value) {
         try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-            return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String hmacSha256Hex(byte[] key, String data) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(key, "HmacSHA256"));
-            return Hex.encodeHexString(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return digest.digest(value.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
