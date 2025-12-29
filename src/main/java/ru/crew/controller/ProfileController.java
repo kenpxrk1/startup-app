@@ -4,14 +4,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.crew.dto.profile.ProfileCreateRequest;
 import ru.crew.dto.profile.ProfileUpdateRequest;
 import ru.crew.dto.profile.ProfileResponse;
+import ru.crew.model.UserEntity;
 import ru.crew.service.ProfileService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/profiles")
 @RequiredArgsConstructor
@@ -24,6 +28,12 @@ public class ProfileController {
     @Operation(summary = "Получить список всех профилей")
     public List<ProfileResponse> getAll() {
         return service.findAll();
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Get current user profile")
+    public ProfileResponse getCurrentUserProfile(@AuthenticationPrincipal UserEntity currentUser) {
+        return service.findByUserId(currentUser.getId());
     }
 
     @GetMapping("/{id}")

@@ -19,7 +19,7 @@ public class RefreshTokenEntity {
     @Id
     private String token;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private UserEntity user;
 
     private Instant expiresAt;

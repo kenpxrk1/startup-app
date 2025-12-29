@@ -36,6 +36,13 @@ public class ProfileService {
         );
     }
 
+    public ProfileResponse findByUserId(Long userId) {
+        return mapper.toResponse(
+                repository.findByUserId(userId)
+                        .orElseThrow(() -> new RuntimeException("Profile not found"))
+        );
+    }
+
     @Transactional
     public ProfileResponse create(ProfileCreateRequest request) {
         UserEntity user = userRepository.findById(request.userId())

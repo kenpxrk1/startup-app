@@ -37,17 +37,16 @@ public class ProfileEntity extends BaseEntity {
     @Column(nullable = false)
     private String city;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "profile_interests", joinColumns = @JoinColumn(name = "profile_id"))
     private List<String> interests;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "profile_photos", joinColumns = @JoinColumn(name = "profile_id"))
     private List<String> photos;
 
     @Column(nullable = false)
     private Boolean showIntents;
 
-    // getters/setters
 }
 
